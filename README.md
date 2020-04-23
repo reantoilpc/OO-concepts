@@ -186,3 +186,115 @@ public class AuthenticationService
 }
 
 ```
+
+- 里氏替換原則，簡稱 LSP
+    - 原文定義：
+        - If for each object o1 of type S there is an object o2 of type T such that for all programs P defined in terms of T, the behavior of P is unchanged when o1 is substituted for o2 then S is a subtype of T.
+        - Functions that use pointers or references to base classes must be able to use objects of derived classes without knowing it
+- 簡單來說：
+    - 子類別必須能夠替換父類別，並且功能不受影響    
+- 目的是什麼：
+    - 規範繼承的標準，因為繼承的特性導致高耦合，子類別對於方法修改(Override, Overload) 必須依照父類別行為方向，否則會對整體的繼承體系照成破壞，會有產生不可預測的行為與不好察覺 Bug
+- 原則：
+    - 子類別必須完全實現父類別的方法
+    - 子類別可以擁有自己不同的屬性與方法
+
+- 說明：
+    - 以這例子，無法實作父類的方法，如果要達成目地，就需要改動父類別程式。
+
+**Bad:**
+
+```csharp
+
+public static void Main(string[] args)
+{
+    //長方型面積
+    var rectangle = new Rectangle(2, 5);
+    Console.WriteLine("Rectangle Area : " + rectangle.GetArea());
+
+    //正方型面積
+    var square = new Square(2, 5);
+    Console.WriteLine("square Area : " + square.GetArea());
+}
+
+internal class Rectangle
+{
+    private readonly int _width;
+    private readonly int _height;
+
+    public Rectangle(int width, int height)
+    {
+        _width = width;
+        _height = height;
+    }
+
+    public int GetArea()
+    {
+        return _width * _height;
+    }
+}
+
+internal class Square : Rectangle
+{
+    public Square(int width, int height) : base(width, height)
+    {     
+    }
+}
+```
+
+**Good:**
+
+```csharp
+
+public static void Main(string[] args)
+{
+    //長方型面積
+    var rectangle = new Rectangle(2, 5);
+    Console.WriteLine("Rectangle Area : " + rectangle.GetArea());
+
+    //正方型面積
+    var square = new Square(2, 5);
+    Console.WriteLine("square Area : " + square.GetArea());
+}
+
+internal abstract class ShapeBase
+{
+    protected int Width;
+    protected int Height;
+    public abstract int GetArea();
+}
+
+internal class Square : ShapeBase
+{
+    public Square(int width, int height)
+    {
+        base.Width = width;
+        base.Height = height;
+    }
+
+    public override int GetArea()
+    {
+        if (base.Width == base.Height)
+        {
+            return base.Width * base.Height;
+        }
+
+        throw new Exception("長寛長度不相等");
+    }
+}
+
+internal class Rectangle : ShapeBase
+{
+    public Rectangle(int width, int height)
+    {
+        base.Width = width;
+        base.Height = height;
+    }
+
+    public override int GetArea()
+    {
+        return base.Width * base.Height;
+    }
+}
+
+```
