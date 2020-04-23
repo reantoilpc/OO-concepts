@@ -202,6 +202,7 @@ public class AuthenticationService
 - 說明：
     - 以這例子，正方型無法實作父類的方法，而且要計算正確的面積，就需要改動父類別程式
 
+    
 **Bad:**
 
 ```csharp
