@@ -198,7 +198,6 @@ public class AuthenticationService
 - 原則：
     - 子類別必須完全實現父類別的方法
     - 子類別可以擁有自己不同的屬性與方法
-
 - 說明：
     - 以這例子，正方型無法實作父類的方法，而且要計算正確的面積，就需要改動父類別程式
 
@@ -295,6 +294,121 @@ internal class Rectangle : ShapeBase
     public override int GetArea()
     {
         return base.Width * base.Height;
+    }
+}
+
+```
+
+- 最少知識原則，簡稱 LoD/LKP
+    - 原文定義：
+        - Law of Demeter, LoD (狄米特法則)
+        - Least Knowledge Principle, LKP (最少知識原則)
+- 簡單來說：
+    - 任何一個 object 應該只要讓外部 object 知道，最少且缺一不可的資訊，就可以正常 interact
+- 目的是什麼：
+    - 用來解耦合，也就是降低類別與類別之間耦合的程度。當耦合程度降低時，每一個class可以跟其他class互動的機會就會增加，reuse的機會就會增加
+- 原則：
+    - 透過封裝以及visibility的控制，謹慎的考慮該使用public, protected, private 還是internal的能見度
+- 說明：
+    - 以這例子，當系統發生異常需要發送通知，假如這通知有Email、簡訊，就應該包裝一個方法呼叫
+
+    
+**Bad:**
+
+```csharp
+public static void Main(string[] args)
+{
+    //系統發生異常，需要發通知
+    ANotificationService notificationService = new NotificationService(new MailService(), new MessageService());
+    
+    //通知負責人
+    var user = new User();
+    notificationService.SendMail(user, "system error");
+    notificationService.SendMessage(user, "system error");
+}
+
+public abstract class ANotificationService
+{
+    protected readonly IMessageService MessageService;
+    protected readonly IMailService EmailService;
+
+    protected ANotificationService()
+    {
+    }
+
+    protected ANotificationService(IMailService emailService, IMessageService messageService)
+    {
+        EmailService = emailService;
+        MessageService = messageService;
+    }
+
+    public abstract void SendMail(User receiver, string message);
+    public abstract void SendMessage(User receiver, string message);
+}
+
+public class NotificationService : ANotificationService
+{
+    public NotificationService(IMailService emailService, IMessageService messageService) 
+        : base(emailService, messageService)
+    {
+    }
+    
+    public override void SendMail(User receiver, string message)
+    {
+        //發Mail
+    }
+
+    public override void SendMessage(User receiver, string message)
+    {
+        //發簡訊
+    }
+}
+```
+
+**Good:**
+
+```csharp
+
+public static void Main(string[] args)
+{
+    //系統發生異常，需要發通知
+    ANotificationService notificationService = new NotificationService(new MailService(), new MessageService());
+
+    //通知負責人
+    var user = new User();
+    notificationService.NotifyUser(user, "system error");
+}
+
+public abstract class ANotificationService
+{
+    protected readonly IMessageService MessageService;
+    protected readonly IMailService EmailService;
+
+    protected ANotificationService()
+    {
+    }
+
+    protected ANotificationService(IMailService emailService, IMessageService messageService)
+    {
+        EmailService = emailService;
+        MessageService = messageService;
+    }
+
+    public abstract void NotifyUser(User user, string message);
+}
+
+public class NotificationService : ANotificationService
+{
+    public NotificationService(IMailService emailService, IMessageService messageService)
+        : base(emailService, messageService)
+    {
+    }
+
+    public override void NotifyUser(User user, string message)
+    {
+        //發Mail
+
+        //發簡訊
     }
 }
 
