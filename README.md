@@ -319,7 +319,9 @@ internal class Rectangle : ShapeBase
 public static void Main(string[] args)
 {
     //系統發生異常，需要發通知
-    ANotificationService notificationService = new NotificationService(new MailService(), new MessageService());
+    var mailService = new new MailService();
+    var messageService = new MessageService();
+    ANotificationService notificationService = new NotificationService(mailService, messageService);
     
     //通知負責人
     var user = new User();
@@ -372,7 +374,9 @@ public class NotificationService : ANotificationService
 public static void Main(string[] args)
 {
     //系統發生異常，需要發通知
-    ANotificationService notificationService = new NotificationService(new MailService(), new MessageService());
+    var mailService = new new MailService();
+    var messageService = new MessageService();
+    ANotificationService notificationService = new NotificationService(mailService, messageService);
 
     //通知負責人
     var user = new User();
