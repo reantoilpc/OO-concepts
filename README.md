@@ -417,3 +417,93 @@ public class NotificationService : ANotificationService
 }
 
 ```
+
+- 介面隔離原則，簡稱 LSP
+    - 原文定義：
+        - Clients should not be forced to depend upon interfaces that they do not use.
+        - The dependency of one class to another one should depend on the smallest possible interface.
+- 簡單來說：
+    - class 與外部的關係，只依賴它需要的最小介面，所以介面不能太肥，要細化
+    - 但會與單一職責有衝突，同一個職責的方法，應該要放在一起
+    - 介面隔離原則，每個 class 實作某個介面，代表會用到該介面所有的方法，如果用不到所有方法，就應該拆分多個介面
+- 目的是什麼：
+    - 對介面的範圍進行約束
+- 原則：
+    - 介面盡量小
+    - 介面應高內聚
+    - 訂製服務
+- 說明：
+    - 以這例子，僱員在公司需要工作、面試，但面試只有主管才能作，所以應該要拆分成二個介面
+
+    
+**Bad:**
+
+```csharp
+internal interface IEmployee
+{
+    void Work();
+    void Interview();
+}
+
+internal class Manager : IEmployee
+{
+    public void Work()
+    {
+        //寫程式
+    }
+
+    public void Interview()
+    {
+        //面試
+    }
+}
+
+internal class Staff : IEmployee
+{
+    public void Work()
+    {
+        //寫程式
+    }
+
+    public void Interview()
+    {
+        //面試
+    }
+}
+```
+
+**Good:**
+
+```csharp
+internal interface IEmployee
+{
+    void Work();
+}
+
+internal interface IManager : IEmployee
+{
+    void Interview();
+}
+
+internal class Manager : IManager
+{
+    public void Work()
+    {
+        //寫程式
+    }
+
+    public void Interview()
+    {
+        //面試
+    }
+}
+
+internal class Staff : IEmployee
+{
+    public void Work()
+    {
+        //寫程式
+    }
+}
+
+```
