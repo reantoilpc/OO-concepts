@@ -199,7 +199,7 @@ public class AuthenticationService
     - 子類別必須完全實現父類別的方法
     - 子類別可以擁有自己不同的屬性與方法
 - 說明：
-    - 以這例子，正方型無法實作父類的方法，而且要計算正確的面積，就需要改動父類別程式
+    - 以這例子，正方型無法實作父類的方法，而且要計算正確的面積，就需要改動父類別程式.
 
     
 **Bad:**
@@ -433,8 +433,7 @@ public class NotificationService : ANotificationService
     - 介面應高內聚
     - 訂製服務
 - 說明：
-    - 以這例子，僱員在公司需要工作、面試，但面試只有主管才能作，所以應該要拆分成二個介面
-
+    - 以這例子，僱員在公司需要工作、面試，但只有主管身份才面試，所以應該要拆分成二個介面
     
 **Bad:**
 
@@ -503,6 +502,109 @@ internal class Staff : IEmployee
     public void Work()
     {
         //寫程式
+    }
+}
+
+```
+
+- 依賴反轉原則，簡稱 DIP
+    - 原文定義：
+        - High-level modules should not depend on low-level modules. Both should depend on abstractions.
+        - Abstractions should not depend upon details. Details should depend on abstractions.
+- 簡單來說：
+    - class 之間的耦合關係，要多墊一層 interface / abstract 隔開
+    - 高層要低層方法，就要透過 interface 來描述抽象行為.
+
+- 說明：
+    - 以這例子，早上9點公司開始上班，主管和員工都要工作，但如果這時多一位掃地丫姨，就會異動到 Company 的程式
+    - 但換個方式，用外部注入可能是一個集合或是一個工廠，這樣就不需要動到原本程式邏輯
+    
+**Bad:**
+
+```csharp
+
+public abstract class AEmployee
+{
+    public abstract void Work();
+}
+
+internal class Manager : AEmployee
+{
+    public override void Work()
+    {
+        //寫程式
+        
+        //面試
+    }
+}    
+internal class Staff : AEmployee
+{
+    public override void Work()
+    {
+        //寫程式
+    }
+}
+
+public class Company
+{
+    private readonly AEmployee _manager;
+    private readonly AEmployee _staff;
+
+    public Company(AEmployee manager, AEmployee staff)
+    {
+        _manager = manager;
+        _staff = staff;
+    }
+
+    public void Working()
+    {
+        _manager.Work();
+        _staff.Work();
+    }
+}
+
+```
+
+**Good:**
+
+```csharp
+public abstract class AEmployee
+{
+    public abstract void Work();
+}
+
+internal class Manager : AEmployee
+{
+    public override void Work()
+    {
+        //寫程式
+        
+        //面試
+    }
+}    
+internal class Staff : AEmployee
+{
+    public override void Work()
+    {
+        //寫程式
+    }
+}
+
+public class Company
+{
+    private readonly IEnumerable<AEmployee> _employees;
+    
+    public Company(IEnumerable<AEmployee> employees)
+    {
+        _employees = employees;
+    }
+
+    public void Working()
+    {
+        foreach (var employee in _employees)
+        {
+            employee.Work();
+        }
     }
 }
 
